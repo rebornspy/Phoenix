@@ -324,31 +324,13 @@ player.CharacterAdded:Connect(function(char)
 	end
 end)
 
--- Player Dropdown
-local function getPlayerNames()
-	local list = {}
-	for _, plr in ipairs(Players:GetPlayers()) do
-		table.insert(list, plr.Name)
-	end
-	return list
-end
-
-local playerDropdown = combatSection:CreateDropdown({
+combatSection:CreatePlayerDropdown({
 	Name = "Players",
-	Options = getPlayerNames(),
-	Default = "Select",
-	Callback = function(selected)
-		print("Selected player:", selected)
+	Default = "Select...",
+	Callback = function(playerObj, playerName)
+		print("Selected:", playerName, playerObj)
 	end,
 })
-
-Players.PlayerAdded:Connect(function()
-	playerDropdown.Refresh(getPlayerNames())
-end)
-
-Players.PlayerRemoving:Connect(function()
-	playerDropdown.Refresh(getPlayerNames())
-end)
 
 -- Massless Grab
 local drag = ReplicatedFirst.GrabParts.DragPart

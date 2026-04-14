@@ -903,14 +903,17 @@ function Window:_restackNotifications()
 	end
 
 	local children = holder:GetChildren()
+
+	-- Sort by LayoutOrder (oldest first, newest last)
 	table.sort(children, function(a, b)
 		return a.LayoutOrder < b.LayoutOrder
 	end)
 
+	-- Position oldest at top, newest at bottom
 	for i, notif in ipairs(children) do
 		if notif:IsA("Frame") then
 			notif:TweenPosition(
-				UDim2.new(1, 0, 1, -((i - 1) * 65)),
+				UDim2.new(1, 0, 1, -((#children - i) * 65)),
 				Enum.EasingDirection.Out,
 				Enum.EasingStyle.Quad,
 				0.25,
@@ -1792,6 +1795,41 @@ function Section:CreateDropdown(config)
 			return button.Text
 		end,
 	}
+end
+
+-- PLAYER DROPDOWN
+function Section:CreatePlayerDropdown(data)
+	local function getPlayerNames()
+		local list = {}
+		for _, plr in ipairs(Players:GetPlayers()) do
+			table.insert(list, plr.Name)
+		end
+		return list
+	end
+
+	-- Create the actual dropdown
+	local dropdown = self:CreateDropdown({
+		Name = data.Name or "Players",
+		Options = getPlayerNames(),
+		Default = data.Default or "Select",
+		Callback = function(selected)
+			if data.Callback then
+				local plr = Players:FindFirstChild(selected)
+				data.Callback(plr, selected)
+			end
+		end,
+	})
+
+	-- Auto‑refresh on join/leave
+	Players.PlayerAdded:Connect(function()
+		dropdown.Refresh(getPlayerNames())
+	end)
+
+	Players.PlayerRemoving:Connect(function()
+		dropdown.Refresh(getPlayerNames())
+	end)
+
+	return dropdown
 end
 
 --------------------------------------------------------
