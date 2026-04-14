@@ -6,7 +6,8 @@
     Credits:
         SCRIPTING       |   @rebornspy
         DESIGN          |   @rebornspy
-        EVERYTHING ELSE |   @rebornspy
+        DOCUMENTATION   |   @rebornspy
+		EVERYTHING ELSE |   @rebornspy
     (yes this is a solo dev project)
 ]]
 
