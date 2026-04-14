@@ -1,6 +1,6 @@
 --[[
 
-    RebornLib Interface Suite
+    Phoenix Interface Suite
     by reborb (@rebornspy)
     
     Credits:
@@ -10,16 +10,16 @@
     (yes this is a solo dev project)
 ]]
 
-local RebornLib = {}
-RebornLib.__index = RebornLib
+local Phoenix = {}
+Phoenix.__index = Phoenix
 
 --// Hot Reload (executor only)
 do
 	local ok, g = pcall(getgenv)
 	if ok and type(g) == "table" then
-		if g.RebornLib_ExecGui and g.RebornLib_ExecGui.Parent then
+		if g.Phoenix_ExecGui and g.Phoenix_ExecGui.Parent then
 			pcall(function()
-				g.RebornLib_ExecGui:Destroy()
+				g.Phoenix_ExecGui:Destroy()
 			end)
 		end
 	end
@@ -45,7 +45,7 @@ task.spawn(function()
 end)
 
 --// Themes
-RebornLib.Themes = {
+Phoenix.Themes = {
 	Default = {
 		Background = Color3.fromRGB(15, 15, 18),
 		Panel = Color3.fromRGB(22, 22, 26),
@@ -262,7 +262,7 @@ end
 
 local function createScreenGui()
 	local gui = Instance.new("ScreenGui")
-	gui.Name = "RebornLib"
+	gui.Name = "Phoenix"
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = true
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
@@ -275,7 +275,7 @@ local function createScreenGui()
 	-- store for hot reload
 	local ok, g = pcall(getgenv)
 	if ok and type(g) == "table" then
-		g.RebornLib_ExecGui = gui
+		g.Phoenix_ExecGui = gui
 	end
 
 	return gui
@@ -295,7 +295,7 @@ Section.__index = Section
 -- WINDOW CREATION
 ----------------------------------------------------------------
 
-function RebornLib:CreateWindow(config)
+function Phoenix:CreateWindow(config)
 	config = config or {}
 	local self = setmetatable({}, Window)
 	local window = self
@@ -306,7 +306,7 @@ function RebornLib:CreateWindow(config)
 	self.BackButton = (config.BackButton ~= false)
 
 	local themeName = config.Theme or "Default"
-	self.Theme = RebornLib.Themes[themeName] or RebornLib.Themes.Default
+	self.Theme = Phoenix.Themes[themeName] or Phoenix.Themes.Default
 	local Theme = self.Theme
 
 	self._tabs = {}
@@ -429,7 +429,7 @@ function RebornLib:CreateWindow(config)
 	subtitle.Size = UDim2.new(0.9, 0, 0, 20)
 	subtitle.BackgroundTransparency = 1
 	subtitle.Font = Theme.Font
-	subtitle.Text = "Thank you for using RebornLib!"
+	subtitle.Text = "Thank you for using Phoenix!"
 	subtitle.TextColor3 = Theme.Text
 	subtitle.TextSize = 14
 	subtitle.ZIndex = 51
@@ -1914,7 +1914,7 @@ end
 ----------------------------------------------------------------
 
 if getgenv then
-	getgenv().RebornLib = RebornLib
+	getgenv().Phoenix = Phoenix
 end
 
-return RebornLib
+return Phoenix

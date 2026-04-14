@@ -17,13 +17,13 @@ local char = player.Character or player.CharacterAdded:Wait()
 local humanoid = char:WaitForChild("Humanoid")
 
 ----------------------------------------------------------------
--- 2. LOAD REBORNLIB & WINDOW SETUP
+-- 2. LOAD Phoenix & WINDOW SETUP
 ----------------------------------------------------------------
-local RebornLib = loadstring(
-	game:HttpGet("https://raw.githubusercontent.com/rebornspy/RebornLib/refs/heads/main/RebornLibExec.lua")
+local Phoenix = loadstring(
+	game:HttpGet("https://raw.githubusercontent.com/rebornspy/Phoenix/refs/heads/main/Phoenix.lua")
 )()
 
-local Window = RebornLib:CreateWindow({
+local Window = Phoenix:CreateWindow({
 	Name = "cool ui",
 	BootTitle = "FTAP Reborn",
 	MainTitle = "FTAP Reborn",
@@ -891,11 +891,11 @@ themesSection:CreateNote({
 	Text = "Choose a theme below. The UI will update instantly.",
 })
 
-for themeName in pairs(RebornLib.Themes) do
+for themeName in pairs(Phoenix.Themes) do
 	themesSection:CreateButton({
 		Name = themeName,
 		Callback = function()
-			Window.Theme = RebornLib.Themes[themeName]
+			Window.Theme = Phoenix.Themes[themeName]
 			Window:_applyTheme()
 		end,
 	})
@@ -911,7 +911,7 @@ infoSection:CreateNote({
 })
 
 infoSection:CreateNote({
-	Text = "RebornLib is a free GUI Library made entirely by reborb (@rebornspy).",
+	Text = "Phoenix is a free GUI Library made entirely by reborb (@rebornspy).",
 })
 
 infoSection:CreateNote({

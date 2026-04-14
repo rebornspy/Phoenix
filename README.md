@@ -1,18 +1,18 @@
-# RebornLibExec
+# PhoenixExec
 
 ## Getting Started
-To use this library, you first need to load it. Paste this line at the top of your script to load RebornLib.
+To use this library, you first need to load it. Paste this line at the top of your script to load Phoenix.
 
 ```lua
-local RebornLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/rebornspy/RebornLib/refs/heads/main/RebornLibExec.lua"))()
+local Phoenix = loadstring(game:HttpGet("https://raw.githubusercontent.com/rebornspy/Phoenix/refs/heads/main/Phoenix.lua"))()
 ```
 
 ## Making a Window
-To make a window, use the method RebornLib:CreateWindow({})
+To make a window, use the method Phoenix:CreateWindow({})
 
 Example:
 ```lua
-local ExampleWindow = RebornLib:CreateWindow({ -- ExampleWindow is the name you will reference to add tabs.
+local ExampleWindow = Phoenix:CreateWindow({ -- ExampleWindow is the name you will reference to add tabs.
     Name = "Example Window",    -- Name of the window in the explorer, not very useful
     BootTitle = "Boot Name",    -- Title displayed on the boot window
     MainTitle = "Main Name",    -- Title displayed on the main window
@@ -172,9 +172,9 @@ More premade themes coming, as well as custom theme support
 
 ## Example Script:
 ```lua
-local RebornLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/rebornspy/RebornLib/refs/heads/main/RebornLibExec.lua"))()
+local Phoenix = loadstring(game:HttpGet("https://raw.githubusercontent.com/rebornspy/Phoenix/refs/heads/main/PhoenixExec.lua"))()
 
-local Window = RebornLib:CreateWindow({
+local Window = Phoenix:CreateWindow({
     Name = "Example Window",
     BootTitle = "Boot",
     MainTitle = "Main",
