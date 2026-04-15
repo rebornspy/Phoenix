@@ -27,6 +27,7 @@ do
 end
 
 --// Useful Services
+local EncodingService = game:GetService("EncodingService")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
@@ -282,6 +283,26 @@ local function createScreenGui()
 	return gui
 end
 
+--// Keycode Normalizer
+local function normalizeKey(key)
+	if typeof(key) == "EnumItem" and key.EnumType == Enum.KeyCode then
+		return key
+	end
+
+	if typeof(key) == "string" then
+		local upper = key:upper()
+		if Enum.KeyCode[upper] then
+			return Enum.KeyCode[upper]
+		end
+	end
+
+	if typeof(key) == "number" then
+		return Enum.KeyCode[key]
+	end
+
+	return Enum.KeyCode.K
+end
+
 --// Objects
 local Window = {}
 Window.__index = Window
@@ -301,14 +322,96 @@ function Phoenix:CreateWindow(config)
 	local self = setmetatable({}, Window)
 	local window = self
 
-	self.Name = config.Name or "Reborn"
-	self.BootTitle = config.BootTitle or (self.Name .. " Launcher")
+	self.Name = config.Name
+	self.BootTitle = config.BootTitle or self.Name
 	self.MainTitle = config.MainTitle or self.Name
 	self.BackButton = (config.BackButton ~= false)
 
 	local themeName = config.Theme or "Default"
 	self.Theme = Phoenix.Themes[themeName] or Phoenix.Themes.Default
 	local Theme = self.Theme
+
+	-- Loading screen
+	local loadingFrame = Instance.new("Frame")
+	loadingFrame.Name = "LoadingScreen"
+	loadingFrame.Size = UDim2.new(1, 0, 1, 0)
+	loadingFrame.BorderSizePixel = 0
+	loadingFrame.ZIndex = 50
+	loadingFrame.Parent = getSafeParent()
+	addCorner(loadingFrame, Theme.CornerRadius)
+
+	local loadingGradient = Instance.new("UIGradient")
+	loadingGradient.Color = Theme.Gradient
+	loadingGradient.Rotation = 55
+	loadingGradient.Parent = loadingFrame
+
+	-- Spinner
+	local spinner = Instance.new("ImageLabel")
+	spinner.Name = "Spinner"
+	spinner.AnchorPoint = Vector2.new(0.5, 0.5)
+	spinner.Position = UDim2.new(0.5, 0, 0.35, 0)
+	spinner.Size = UDim2.new(0, 40, 0, 40)
+	spinner.BackgroundTransparency = 1
+	spinner.Image = "rbxassetid://3926305904"
+	spinner.ImageRectOffset = Vector2.new(120, 680)
+	spinner.ImageRectSize = Vector2.new(44, 44)
+	spinner.ZIndex = 51
+	spinner.Parent = loadingFrame
+
+	-- Progress bar background
+	local barBG = Instance.new("Frame")
+	barBG.Name = "ProgressBG"
+	barBG.Size = UDim2.new(0.8, 0, 0, 10)
+	barBG.Position = UDim2.new(0.1, 0, 0.55, 0)
+	barBG.BackgroundColor3 = Theme.Background
+	barBG.BorderSizePixel = 0
+	barBG.ZIndex = 51
+	barBG.Parent = loadingFrame
+	addCorner(barBG, 6)
+
+	-- Progress bar fill
+	local barFill = Instance.new("Frame")
+	barFill.Name = "ProgressFill"
+	barFill.Size = UDim2.new(0, 0, 1, 0)
+	barFill.BackgroundColor3 = Theme.Accent
+	barFill.BorderSizePixel = 0
+	barFill.ZIndex = 52
+	barFill.Parent = barBG
+	addCorner(barFill, 6)
+
+	-- Subtitle
+	local subtitle = Instance.new("TextLabel")
+	subtitle.Name = "Subtitle"
+	subtitle.AnchorPoint = Vector2.new(0.5, 0)
+	subtitle.Position = UDim2.new(0.5, 0, 0.65, 0)
+	subtitle.Size = UDim2.new(0.9, 0, 0, 20)
+	subtitle.BackgroundTransparency = 1
+	subtitle.Font = Theme.Font
+	subtitle.Text = config.LoadingText
+	subtitle.TextColor3 = Theme.Text
+	subtitle.TextSize = 14
+	subtitle.ZIndex = 51
+	subtitle.Parent = loadingFrame
+
+	window._toggleKey = normalizeKey(config.ToggleUiKey or "K")
+	window._isBindingKey = false
+
+	function window:SetToggleKey(key)
+		window._toggleKey = normalizeKey(key)
+	end
+
+	UIS.InputBegan:Connect(function(input, gp)
+		if gp then
+			return
+		end
+		if window._isBindingKey then
+			return
+		end
+
+		if input.KeyCode == window._toggleKey then
+			window:ToggleUI()
+		end
+	end)
 
 	self._tabs = {}
 	self._activeTab = nil
@@ -373,68 +476,6 @@ function Phoenix:CreateWindow(config)
 	bootUnderline.BorderSizePixel = 0
 	bootUnderline.ZIndex = 12
 	bootUnderline.Parent = bootTopbar
-
-	-- Loading screen
-	local loadingFrame = Instance.new("Frame")
-	loadingFrame.Name = "LoadingScreen"
-	loadingFrame.Size = UDim2.new(1, 0, 1, 0)
-	loadingFrame.BorderSizePixel = 0
-	loadingFrame.ZIndex = 50
-	loadingFrame.Parent = bootFrame
-	addCorner(loadingFrame, Theme.CornerRadius)
-
-	local loadingGradient = Instance.new("UIGradient")
-	loadingGradient.Color = Theme.Gradient
-	loadingGradient.Rotation = 55
-	loadingGradient.Parent = loadingFrame
-
-	-- Spinner
-	local spinner = Instance.new("ImageLabel")
-	spinner.Name = "Spinner"
-	spinner.AnchorPoint = Vector2.new(0.5, 0.5)
-	spinner.Position = UDim2.new(0.5, 0, 0.35, 0)
-	spinner.Size = UDim2.new(0, 40, 0, 40)
-	spinner.BackgroundTransparency = 1
-	spinner.Image = "rbxassetid://3926305904"
-	spinner.ImageRectOffset = Vector2.new(120, 680)
-	spinner.ImageRectSize = Vector2.new(44, 44)
-	spinner.ZIndex = 51
-	spinner.Parent = loadingFrame
-
-	-- Progress bar background
-	local barBG = Instance.new("Frame")
-	barBG.Name = "ProgressBG"
-	barBG.Size = UDim2.new(0.8, 0, 0, 10)
-	barBG.Position = UDim2.new(0.1, 0, 0.55, 0)
-	barBG.BackgroundColor3 = Theme.Background
-	barBG.BorderSizePixel = 0
-	barBG.ZIndex = 51
-	barBG.Parent = loadingFrame
-	addCorner(barBG, 6)
-
-	-- Progress bar fill
-	local barFill = Instance.new("Frame")
-	barFill.Name = "ProgressFill"
-	barFill.Size = UDim2.new(0, 0, 1, 0)
-	barFill.BackgroundColor3 = Theme.Accent
-	barFill.BorderSizePixel = 0
-	barFill.ZIndex = 52
-	barFill.Parent = barBG
-	addCorner(barFill, 6)
-
-	-- Subtitle
-	local subtitle = Instance.new("TextLabel")
-	subtitle.Name = "Subtitle"
-	subtitle.AnchorPoint = Vector2.new(0.5, 0)
-	subtitle.Position = UDim2.new(0.5, 0, 0.65, 0)
-	subtitle.Size = UDim2.new(0.9, 0, 0, 20)
-	subtitle.BackgroundTransparency = 1
-	subtitle.Font = Theme.Font
-	subtitle.Text = "Thank you for using Phoenix!"
-	subtitle.TextColor3 = Theme.Text
-	subtitle.TextSize = 14
-	subtitle.ZIndex = 51
-	subtitle.Parent = loadingFrame
 
 	local bootContent = Instance.new("ScrollingFrame")
 	bootContent.Name = "Content"
@@ -652,20 +693,6 @@ function Phoenix:CreateWindow(config)
 	task.delay(2.5, function()
 		loadingFrame.Visible = false
 		bootContent.Visible = true
-	end)
-
-	UIS.InputBegan:Connect(function(input, gp)
-		if gp then
-			return
-		end
-
-		if self._isBindingKey then
-			return
-		end
-
-		if input.KeyCode == self._uiToggleKey then
-			self:ToggleUI()
-		end
 	end)
 
 	self:_registerThemeObject(mainTopbar, "BackgroundColor3", "Section")
