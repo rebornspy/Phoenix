@@ -32,6 +32,7 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -45,6 +46,24 @@ task.spawn(function()
 	UIS.MouseBehavior = Enum.MouseBehavior.Default
 	UIS.MouseIconEnabled = true
 end)
+
+--// Config Help
+local function readConfig(path)
+	if not isfile(path) then
+		return {}
+	end
+
+	local raw = readfile(path)
+	local ok, data = pcall(function()
+		return HttpService:JSONDecode(raw)
+	end)
+
+	return ok and data or {}
+end
+
+local function writeConfig(path, data)
+	writefile(path, HttpService:JSONEncode(data))
+end
 
 --// Themes
 Phoenix.Themes = {
@@ -318,6 +337,10 @@ Section.__index = Section
 ----------------------------------------------------------------
 
 function Phoenix:CreateWindow(config)
+	if not isfolder("Phoenix") then
+		makefolder("Phoenix")
+	end
+
 	config = config or {}
 	local self = setmetatable({}, Window)
 	local window = self
@@ -413,9 +436,40 @@ function Phoenix:CreateWindow(config)
 		end
 	end)
 
+	function Window:_loadConfig()
+		local path = "Phoenix/" .. (self.Name or "Window") .. ".json"
+		self._configPath = path
+
+		if not isfile(path) then
+			self._config = {}
+			return
+		end
+
+		local ok, data = pcall(function()
+			return HttpService:JSONDecode(readfile(path))
+		end)
+
+		self._config = ok and data or {}
+	end
+
+	function Window:_saveConfig()
+		writefile(self._configPath, HttpService:JSONEncode(self._config))
+	end
+
+	function Window:GetConfigValue(key, default)
+		local cfg = self._config[key]
+		return cfg ~= nil and cfg or default
+	end
+
+	function Window:SetConfigValue(key, value)
+		self._config[key] = value
+		self:_saveConfig()
+	end
+
 	self._tabs = {}
 	self._activeTab = nil
 
+	self:_loadConfig()
 	self._gui = createScreenGui()
 
 	------------------------------------------------
@@ -1226,11 +1280,18 @@ end
 function Section:CreateToggle(config)
 	config = config or {}
 	local name = config.Name or "Toggle"
+	local key = config.ConfigKey
 	local default = config.Default or false
 	local callback = config.Callback or function() end
 
 	local window = self._window
 	local Theme = window.Theme
+
+	if not key then
+		warn("[Phoenix] Missing ConfigKey for Toggle: " .. tostring(name))
+	end
+
+	local saved = key and window:GetConfigValue(key, default) or default
 
 	local frame = Instance.new("Frame")
 	frame.Name = "Toggle"
@@ -1264,7 +1325,7 @@ function Section:CreateToggle(config)
 	local knob = Instance.new("Frame")
 	knob.Name = "Knob"
 	knob.Size = UDim2.new(0, 16, 0, 16)
-	knob.Position = UDim2.new(default and 1 or 0, default and -17 or 1, 0.5, -8)
+	knob.Position = UDim2.new(saved and 1 or 0, saved and -17 or 1, 0.5, -8)
 	knob.BackgroundColor3 = Theme.Text
 	knob.BorderSizePixel = 0
 	knob.ZIndex = 23
@@ -1279,19 +1340,26 @@ function Section:CreateToggle(config)
 	hitbox.ZIndex = 24
 	hitbox.Parent = switch
 
-	local state = default
+	local state = saved
 
 	local function setState(v)
 		state = v
 		local Theme = window.Theme
+
 		tween(knob, 0.15, {
-			Position = UDim2.new(state and 1 or 0, state and -17 or 1, 0.5, -8),
+			Position = UDim2.new(v and 1 or 0, v and -17 or 1, 0.5, -8),
 			BackgroundColor3 = Theme.Text,
 		})
+
 		tween(switch, 0.15, {
-			BackgroundColor3 = state and Theme.Accent or Theme.Background,
+			BackgroundColor3 = v and Theme.Accent or Theme.Background,
 		})
-		callback(state)
+
+		if key then
+			window:SetConfigValue(key, v)
+		end
+
+		callback(v)
 	end
 
 	hitbox.MouseButton1Click:Connect(function()
@@ -1317,7 +1385,8 @@ function Section:CreateToggle(config)
 	window:_registerThemeObject(switch, "BackgroundColor3", "Background")
 	window:_registerThemeObject(knob, "BackgroundColor3", "Text")
 
-	setState(default)
+	-- Apply saved state
+	setState(saved)
 
 	return {
 		Set = setState,
@@ -1331,6 +1400,7 @@ end
 function Section:CreateSlider(config)
 	config = config or {}
 	local name = config.Name or "Slider"
+	local key = config.ConfigKey
 	local min = config.Min or 0
 	local max = config.Max or 100
 	local step = config.Step or 1
@@ -1338,6 +1408,12 @@ function Section:CreateSlider(config)
 	local callback = config.Callback or function() end
 
 	local window = self._window
+
+	if not key then
+		warn("[Phoenix] Missing ConfigKey for Slider: " .. tostring(name))
+	end
+
+	local saved = key and window:GetConfigValue(key, default) or default
 
 	-- Container
 	local frame = Instance.new("Frame")
@@ -1360,7 +1436,7 @@ function Section:CreateSlider(config)
 	label.ZIndex = 22
 	label.Parent = frame
 
-	-- Bar (visual)
+	-- Bar
 	local bar = Instance.new("Frame")
 	bar.Name = "Bar"
 	bar.Size = UDim2.new(1, -60, 0, 6)
@@ -1393,7 +1469,7 @@ function Section:CreateSlider(config)
 	knob.Parent = bar
 	addCorner(knob, 7)
 
-	-- Hitbox (fixes snapping inside UIListLayout)
+	-- Hitbox
 	local hitbox = Instance.new("Frame")
 	hitbox.Name = "Hitbox"
 	hitbox.Size = UDim2.new(1, 0, 1, 0)
@@ -1409,7 +1485,7 @@ function Section:CreateSlider(config)
 	box.BackgroundColor3 = window.Theme.Background
 	box.BorderSizePixel = 0
 	box.Font = window.Theme.Font
-	box.Text = tostring(default)
+	box.Text = tostring(saved)
 	box.TextColor3 = window.Theme.Text
 	box.TextSize = 14
 	box.ClearTextOnFocus = false
@@ -1417,14 +1493,15 @@ function Section:CreateSlider(config)
 	box.Parent = frame
 	addCorner(box, 4)
 
-	-- Snap Function
+	-- Snap
 	local function snap(v)
 		return math.clamp(math.floor((v - min) / step + 0.5) * step + min, min, max)
 	end
 
-	-- Internal Value + Visual Updating
-	local value = snap(default)
+	-- Internal value
+	local value = snap(saved)
 
+	-- Visual update
 	local function updateVisual(v)
 		local alpha = (v - min) / (max - min)
 		fill.Size = UDim2.new(alpha, 0, 1, 0)
@@ -1432,14 +1509,20 @@ function Section:CreateSlider(config)
 		box.Text = tostring(v)
 	end
 
+	-- Set value
 	local function setValue(v)
 		v = snap(v)
 		value = v
 		updateVisual(v)
+
+		if key then
+			window:SetConfigValue(key, v)
+		end
+
 		callback(v)
 	end
 
-	-- Dragging Logic
+	-- Dragging
 	local dragging = false
 
 	local function drag(input)
@@ -1480,15 +1563,13 @@ function Section:CreateSlider(config)
 		end
 	end)
 
-	-- Input Box
+	-- Input box
 	box.Focused:Connect(function()
-		local Theme = window.Theme
-		tween(box, 0.1, { BackgroundColor3 = Theme.Panel })
+		tween(box, 0.1, { BackgroundColor3 = window.Theme.Panel })
 	end)
 
 	box.FocusLost:Connect(function(enter)
-		local Theme = window.Theme
-		tween(box, 0.1, { BackgroundColor3 = Theme.Background })
+		tween(box, 0.1, { BackgroundColor3 = window.Theme.Background })
 
 		if enter then
 			local num = tonumber(box.Text)
@@ -1500,7 +1581,7 @@ function Section:CreateSlider(config)
 		end
 	end)
 
-	-- Theme Registry
+	-- Theme registry
 	window:_registerThemeObject(label, "TextColor3", "Text")
 	window:_registerThemeObject(label, "Font", "Font")
 	window:_registerThemeObject(bar, "BackgroundColor3", "Background")
@@ -1510,8 +1591,8 @@ function Section:CreateSlider(config)
 	window:_registerThemeObject(box, "TextColor3", "Text")
 	window:_registerThemeObject(box, "Font", "Font")
 
-	-- Initialization
-	setValue(default)
+	-- Apply saved value
+	setValue(saved)
 
 	return {
 		Set = setValue,
@@ -1525,12 +1606,19 @@ end
 function Section:CreateInput(config)
 	config = config or {}
 	local name = config.Name or "Input"
+	local key = config.ConfigKey
 	local placeholder = config.Placeholder or ""
 	local default = config.Default or ""
 	local callback = config.Callback or function() end
 
 	local window = self._window
 	local Theme = window.Theme
+
+	if not key then
+		warn("[Phoenix] Missing ConfigKey for Input: " .. tostring(name))
+	end
+
+	local saved = key and window:GetConfigValue(key, default) or default
 
 	local frame = Instance.new("Frame")
 	frame.Name = "Input"
@@ -1558,7 +1646,7 @@ function Section:CreateInput(config)
 	box.BackgroundColor3 = Theme.Background
 	box.BorderSizePixel = 0
 	box.Font = Theme.Font
-	box.Text = default
+	box.Text = saved
 	box.PlaceholderText = placeholder
 	box.PlaceholderColor3 = Theme.SubtitleText
 	box.TextColor3 = Theme.Text
@@ -1592,9 +1680,13 @@ function Section:CreateInput(config)
 	box.FocusLost:Connect(function(enterPressed)
 		local Theme = window.Theme
 		tween(box, 0.15, { BackgroundColor3 = Theme.Background })
-		if enterPressed or true then
-			callback(box.Text)
+
+		-- Save + callback
+		if key then
+			window:SetConfigValue(key, box.Text)
 		end
+
+		callback(box.Text)
 	end)
 
 	-- Theme registry
@@ -1638,12 +1730,19 @@ end
 function Section:CreateDropdown(config)
 	config = config or {}
 	local name = config.Name or "Dropdown"
+	local key = config.ConfigKey
 	local options = config.Options or {}
 	local default = config.Default or nil
 	local callback = config.Callback or function() end
 
 	local window = self._window
 	local Theme = window.Theme
+
+	if not key then
+		warn("[Phoenix] Missing ConfigKey for Dropdown: " .. tostring(name))
+	end
+
+	local saved = key and window:GetConfigValue(key, default) or default
 
 	-- Container
 	local frame = Instance.new("Frame")
@@ -1674,7 +1773,7 @@ function Section:CreateDropdown(config)
 	button.BackgroundColor3 = Theme.Background
 	button.BorderSizePixel = 0
 	button.Font = Theme.Font
-	button.Text = default or "Select"
+	button.Text = saved or default or "Select"
 	button.TextColor3 = Theme.Text
 	button.TextSize = 14
 	button.AutoButtonColor = false
@@ -1745,34 +1844,28 @@ function Section:CreateDropdown(config)
 			optBtn.ZIndex = 25
 			optBtn.Parent = listFrame
 			addCorner(optBtn, 4)
-			--[[
-			local optStroke = Instance.new("UIStroke")
-			optStroke.Name = "Stroke"
-			optStroke.Color = Theme.Text
-			optStroke.Thickness = 0.5
-			optStroke.Transparency = 0.5
-			optStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-			optStroke.Parent = optBtn
-			]]
+
 			window:_registerThemeObject(optBtn, "BackgroundColor3", "Accent")
 			window:_registerThemeObject(optBtn, "TextColor3", "Text")
 			window:_registerThemeObject(optBtn, "Font", "Font")
 
-			--window:_registerThemeObject(optStroke, "Color", "Text")
-
 			optBtn.MouseEnter:Connect(function()
-				local Theme = window.Theme
 				tween(optBtn, 0.1, { BackgroundColor3 = Theme.AccentGlow })
 			end)
 
 			optBtn.MouseLeave:Connect(function()
-				local Theme = window.Theme
 				tween(optBtn, 0.1, { BackgroundColor3 = Theme.Accent })
 			end)
 
 			optBtn.MouseButton1Click:Connect(function()
 				button.Text = tostring(opt)
+
+				if key then
+					window:SetConfigValue(key, opt)
+				end
+
 				callback(opt)
+
 				open = false
 				listFrame.Visible = false
 				listFrame.Size = UDim2.new(0, 110, 0, 0)
@@ -1813,6 +1906,11 @@ function Section:CreateDropdown(config)
 	return {
 		Set = function(v)
 			button.Text = tostring(v)
+
+			if key then
+				window:SetConfigValue(key, v)
+			end
+
 			callback(v)
 		end,
 		Refresh = function(newOptions)
@@ -1826,7 +1924,14 @@ function Section:CreateDropdown(config)
 end
 
 -- PLAYER DROPDOWN
-function Section:CreatePlayerDropdown(data)
+function Section:CreatePlayerDropdown(config)
+	local key = config.ConfigKey
+	local name = config.Name or "Players"
+
+	if not key then
+		warn("[Phoenix] Missing ConfigKey for PlayerDropdown: " .. tostring(name))
+	end
+
 	local function getPlayerNames()
 		local list = {}
 		for _, plr in ipairs(Players:GetPlayers()) do
@@ -1835,20 +1940,19 @@ function Section:CreatePlayerDropdown(data)
 		return list
 	end
 
-	-- Create the actual dropdown
 	local dropdown = self:CreateDropdown({
-		Name = data.Name or "Players",
+		Name = name,
 		Options = getPlayerNames(),
-		Default = data.Default or "Select",
+		Default = config.Default or "Select",
+		ConfigKey = key,
 		Callback = function(selected)
-			if data.Callback then
+			if config.Callback then
 				local plr = Players:FindFirstChild(selected)
-				data.Callback(plr, selected)
+				config.Callback(plr, selected)
 			end
 		end,
 	})
 
-	-- Auto‑refresh on join/leave
 	Players.PlayerAdded:Connect(function()
 		dropdown.Refresh(getPlayerNames())
 	end)
@@ -1858,6 +1962,141 @@ function Section:CreatePlayerDropdown(data)
 	end)
 
 	return dropdown
+end
+
+-- KEYBIND
+function Section:CreateKeybind(config)
+	config = config or {}
+	local name = config.Name or "Keybind"
+	local key = config.ConfigKey
+	local default = config.Default or "K"
+	local callback = config.Callback or function() end
+
+	local window = self._window
+	local Theme = window.Theme
+
+	if not key then
+		warn("[Phoenix] Missing ConfigKey for Keybind: " .. tostring(name))
+	end
+
+	-- Normalize function (string → Enum.KeyCode)
+	local function normalizeKey(v)
+		if typeof(v) == "EnumItem" and v.EnumType == Enum.KeyCode then
+			return v
+		end
+		if typeof(v) == "string" then
+			local upper = v:upper()
+			if Enum.KeyCode[upper] then
+				return Enum.KeyCode[upper]
+			end
+		end
+		return Enum.KeyCode.K
+	end
+
+	local saved = key and window:GetConfigValue(key, default) or default
+	local currentKey = normalizeKey(saved)
+
+	-- Container
+	local frame = Instance.new("Frame")
+	frame.Name = "Keybind"
+	frame.Size = UDim2.new(1, 0, 0, 28)
+	frame.BackgroundTransparency = 1
+	frame.ZIndex = 22
+	frame.Parent = self._frame
+
+	-- Label
+	local label = Instance.new("TextLabel")
+	label.Name = "Label"
+	label.Size = UDim2.new(1, -120, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Font = Theme.Font
+	label.Text = name
+	label.TextColor3 = Theme.Text
+	label.TextSize = 14
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.ZIndex = 22
+	label.Parent = frame
+
+	-- Button
+	local button = Instance.new("TextButton")
+	button.Name = "Button"
+	button.Size = UDim2.new(0, 110, 0, 22)
+	button.Position = UDim2.new(1, -110, 0.5, -11)
+	button.BackgroundColor3 = Theme.Background
+	button.BorderSizePixel = 0
+	button.Font = Theme.Font
+	button.Text = tostring(currentKey.Name)
+	button.TextColor3 = Theme.Text
+	button.TextSize = 14
+	button.AutoButtonColor = false
+	button.ZIndex = 23
+	button.Parent = frame
+	addCorner(button, 6)
+
+	-- Binding state
+	local binding = false
+
+	local function setKey(newKey)
+		currentKey = normalizeKey(newKey)
+		button.Text = currentKey.Name
+
+		if key then
+			window:SetConfigValue(key, currentKey.Name)
+		end
+
+		callback(currentKey)
+	end
+
+	-- Binding logic
+	button.MouseButton1Click:Connect(function()
+		if binding then
+			return
+		end
+		binding = true
+		window._isBindingKey = true
+
+		button.Text = "Press a key..."
+
+		local conn
+		conn = UIS.InputBegan:Connect(function(input)
+			if input.KeyCode ~= Enum.KeyCode.Unknown then
+				conn:Disconnect()
+				binding = false
+				window._isBindingKey = false
+				setKey(input.KeyCode)
+			end
+		end)
+	end)
+
+	-- Hover
+	button.MouseEnter:Connect(function()
+		if not binding then
+			tween(button, 0.15, { BackgroundColor3 = Theme.Panel })
+		end
+	end)
+
+	button.MouseLeave:Connect(function()
+		if not binding then
+			tween(button, 0.15, { BackgroundColor3 = Theme.Background })
+		end
+	end)
+
+	-- Theme registry
+	window:_registerThemeObject(label, "TextColor3", "Text")
+	window:_registerThemeObject(label, "Font", "Font")
+	window:_registerThemeObject(button, "BackgroundColor3", "Background")
+	window:_registerThemeObject(button, "TextColor3", "Text")
+	window:_registerThemeObject(button, "Font", "Font")
+
+	-- Apply saved key
+	setKey(currentKey)
+
+	return {
+		Set = setKey,
+		Get = function()
+			return currentKey
+		end,
+	}
 end
 
 --------------------------------------------------------
