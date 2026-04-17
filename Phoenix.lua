@@ -450,8 +450,61 @@ function Phoenix:CreateWindow(config)
 		self:_saveConfig()
 	end
 
+	function Window:ExportConfig(path)
+		path = path or self._configPath
+		writefile(path, HttpService:JSONEncode(self._config))
+
+		self:Notify({
+			Title = "Config Exported",
+			Content = "Saved to " .. path,
+			Duration = 3,
+		})
+	end
+
+	function Window:ImportConfig(path)
+		if not isfile(path) then
+			return self:Notify({
+				Title = "Import Failed",
+				Content = "File does not exist.",
+				Duration = 3,
+			})
+		end
+
+		local raw = readfile(path)
+		local ok, data = pcall(function()
+			return HttpService:JSONDecode(raw)
+		end)
+
+		if not ok then
+			return self:Notify({
+				Title = "Import Failed",
+				Content = "Invalid JSON file.",
+				Duration = 3,
+			})
+		end
+
+		-- Replace config
+		self._config = data
+		self:_saveConfig()
+
+		-- Apply values to all components
+		for _, apply in ipairs(self._configCallbacks) do
+			apply(data)
+		end
+
+		self:Notify({
+			Title = "Config Imported",
+			Content = "Config applied successfully.",
+			Duration = 3,
+		})
+
+		return true
+	end
+
 	self._tabs = {}
 	self._activeTab = nil
+
+	self._configCallbacks = {}
 
 	self:_loadConfig()
 	self._gui = createScreenGui()
@@ -1372,6 +1425,15 @@ function Section:CreateToggle(config)
 	-- Apply saved state
 	setState(saved)
 
+	if key then
+		table.insert(window._configCallbacks, function(cfg)
+			local v = cfg[key]
+			if v ~= nil then
+				setState(v)
+			end
+		end)
+	end
+
 	return {
 		Set = setState,
 		Get = function()
@@ -1577,6 +1639,15 @@ function Section:CreateSlider(config)
 
 	-- Apply saved value
 	setValue(saved)
+
+	if key then
+		table.insert(window._configCallbacks, function(cfg)
+			local v = cfg[key]
+			if v ~= nil then
+				setValue(v)
+			end
+		end)
+	end
 
 	return {
 		Set = setValue,
@@ -1805,6 +1876,16 @@ function Section:CreateDropdown(config)
 
 	local open = false
 
+	local function setValue(v)
+		button.Text = tostring(v)
+
+		if key then
+			window:SetConfigValue(key, v)
+		end
+
+		callback(v)
+	end
+
 	-- Build options
 	local function buildOptions()
 		for _, child in ipairs(listFrame:GetChildren()) do
@@ -1842,14 +1923,7 @@ function Section:CreateDropdown(config)
 			end)
 
 			optBtn.MouseButton1Click:Connect(function()
-				button.Text = tostring(opt)
-
-				if key then
-					window:SetConfigValue(key, opt)
-				end
-
-				callback(opt)
-
+				setValue(opt)
 				open = false
 				listFrame.Visible = false
 				listFrame.Size = UDim2.new(0, 110, 0, 0)
@@ -1887,14 +1961,18 @@ function Section:CreateDropdown(config)
 	window:_registerThemeObject(listFrame, "ScrollBarImageColor3", "AccentHover")
 	window:_registerThemeObject(listStroke, "Color", "AccentGlow")
 
+	if key then
+		table.insert(window._configCallbacks, function(cfg)
+			local v = cfg[key]
+			if v ~= nil then
+				setValue(v)
+			end
+		end)
+	end
+
 	return {
 		Set = function(v)
-			button.Text = tostring(v)
-
-			if key then
-				window:SetConfigValue(key, v)
-			end
-
+			setValue(v)
 			callback(v)
 		end,
 		Refresh = function(newOptions)
@@ -2074,6 +2152,15 @@ function Section:CreateKeybind(config)
 
 	-- Apply saved key
 	setKey(currentKey)
+
+	if key then
+		table.insert(window._configCallbacks, function(cfg)
+			local v = cfg[key]
+			if v ~= nil then
+				setKey(v)
+			end
+		end)
+	end
 
 	return {
 		Set = setKey,

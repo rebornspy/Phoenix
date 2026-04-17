@@ -1,5 +1,5 @@
 ----------------------------------------------------------------
--- 1. SERVICES & GLOBALS
+-- SERVICES & GLOBALS
 ----------------------------------------------------------------
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -17,14 +17,13 @@ local char = player.Character or player.CharacterAdded:Wait()
 local humanoid = char:WaitForChild("Humanoid")
 
 ----------------------------------------------------------------
--- 2. LOAD Phoenix & WINDOW SETUP
+-- LOAD Phoenix & WINDOW SETUP
 ----------------------------------------------------------------
-local Phoenix = loadstring(
-	game:HttpGet("https://raw.githubusercontent.com/rebornspy/Phoenix/refs/heads/main/Phoenix.lua")
-)()
+local Phoenix =
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/rebornspy/Phoenix/refs/heads/main/Phoenix.lua"))()
 
 local Window = Phoenix:CreateWindow({
-	Name = "cool ui",
+	Name = "FTAP Reborn",
 	BootTitle = "FTAP Reborn",
 	MainTitle = "FTAP Reborn",
 	Theme = "Default",
@@ -41,7 +40,7 @@ UserInputService.InputBegan:Connect(function(input, gp)
 end)
 
 ----------------------------------------------------------------
--- 3. TABS
+-- TABS
 ----------------------------------------------------------------
 local MainTab = Window:CreateTab({ Name = "Main" })
 local MovementTab = Window:CreateTab({ Name = "Movement" })
@@ -50,9 +49,10 @@ local VisualTab = Window:CreateTab({ Name = "Visual" })
 local ThemesTab = Window:CreateTab({ Name = "Themes" })
 local InformationTab = Window:CreateTab({ Name = "Information" })
 local TestingTab = Window:CreateTab({ Name = "Testing" })
+local ImportExportTab = Window:CreateTab({ Name = "Import/Export" })
 
 ----------------------------------------------------------------
--- 4. MAIN TAB
+-- MAIN TAB
 ----------------------------------------------------------------
 local mainSection = MainTab:CreateSection({ Name = "General" })
 
@@ -86,7 +86,7 @@ mainSection:CreateButton({
 })
 
 ----------------------------------------------------------------
--- 5. MOVEMENT TAB
+-- MOVEMENT TAB
 ----------------------------------------------------------------
 local walkSection = MovementTab:CreateSection({ Name = "Walk Settings" })
 
@@ -289,7 +289,7 @@ jumpSection:CreateButton({
 })
 
 ----------------------------------------------------------------
--- 6. COMBAT TAB
+-- COMBAT TAB
 ----------------------------------------------------------------
 local combatSection = CombatTab:CreateSection({ Name = "Suicide Section" })
 
@@ -745,7 +745,7 @@ combatSection:CreateToggle({
 })
 
 ----------------------------------------------------------------
--- 7. VISUAL TAB
+-- VISUAL TAB
 ----------------------------------------------------------------
 local shaderSection = VisualTab:CreateSection({ Name = "Shaders Section" })
 
@@ -883,7 +883,7 @@ cameraSection:CreateToggle({
 })
 
 ----------------------------------------------------------------
--- 8. THEMES TAB
+-- THEMES TAB
 ----------------------------------------------------------------
 local themesSection = ThemesTab:CreateSection({ Name = "Themes" })
 
@@ -902,7 +902,7 @@ for themeName in pairs(Phoenix.Themes) do
 end
 
 ----------------------------------------------------------------
--- 9. INFORMATION TAB
+-- INFORMATION TAB
 ----------------------------------------------------------------
 local infoSection = InformationTab:CreateSection({ Name = "Information" })
 
@@ -919,7 +919,7 @@ infoSection:CreateNote({
 })
 
 ----------------------------------------------------------------
--- 10. TESTING TAB
+-- TESTING TAB
 ----------------------------------------------------------------
 local testingSection1 = TestingTab:CreateSection({ Name = "Section 1" })
 
@@ -1026,4 +1026,25 @@ local testingSection5 = TestingTab:CreateSection({ Name = "Section 5" })
 
 testingSection5:CreateNote({
 	Text = "This is a test.",
+})
+
+----------------------------------------------------------------
+-- IMPORT/EXPORT TAB
+----------------------------------------------------------------
+local ExportSection = ImportExportTab:CreateSection({ Name = "Export" })
+
+ExportSection:CreateButton({
+	Name = "Export Config",
+	Callback = function()
+		Window:ExportConfig("Phoenix/Config_export.json")
+	end,
+})
+
+local ImportSection = ImportExportTab:CreateSection({ Name = "Import" })
+
+ImportSection:CreateButton({
+	Name = "Import Config",
+	Callback = function()
+		Window:ImportConfig("Phoenix/Config_import.json")
+	end,
 })
