@@ -27,7 +27,7 @@ local Window = Phoenix:CreateWindow({
     LoadingText = "Phoenix Script",
     BootTitle = "Boot Window",
     MainTitle = "Main Window",
-    Theme = "Default"
+    Theme = "Default",
     ToggleUiKey = K
 })
 
