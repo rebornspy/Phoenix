@@ -535,6 +535,7 @@ function Phoenix:CreateWindow(config)
 	bootFrame.BorderSizePixel = 0
 	bootFrame.ZIndex = 10
 	bootFrame.Parent = self._gui
+	bootFrame.Visible = false
 	addCorner(bootFrame, Theme.CornerRadius)
 
 	-- Boot Topbar
@@ -545,6 +546,7 @@ function Phoenix:CreateWindow(config)
 	bootTopbar.BorderSizePixel = 0
 	bootTopbar.ZIndex = 11
 	bootTopbar.Parent = bootFrame
+	bootTopbar.Visible = false
 	addCorner(bootTopbar, Theme.CornerRadius)
 
 	local bootTitle = Instance.new("TextLabel")
@@ -559,6 +561,7 @@ function Phoenix:CreateWindow(config)
 	bootTitle.TextSize = 16
 	bootTitle.ZIndex = 12
 	bootTitle.Parent = bootTopbar
+	bootTitle.Visible = false
 
 	local bootUnderline = Instance.new("Frame")
 	bootUnderline.Size = UDim2.new(0, 80, 0, 2)
@@ -568,6 +571,7 @@ function Phoenix:CreateWindow(config)
 	bootUnderline.BorderSizePixel = 0
 	bootUnderline.ZIndex = 12
 	bootUnderline.Parent = bootTopbar
+	bootUnderline.Visible = false
 
 	local bootContent = Instance.new("ScrollingFrame")
 	bootContent.Name = "Content"
@@ -784,6 +788,10 @@ function Phoenix:CreateWindow(config)
 	-- End loading after progress completes
 	task.delay(2.5, function()
 		loadingFrame.Visible = false
+		bootFrame.Visible = true
+		bootTopbar.Visible = true
+		bootTitle.Visible = true
+		bootUnderline.Visible = true
 		bootContent.Visible = true
 	end)
 
