@@ -23,21 +23,13 @@ local Phoenix =
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/rebornspy/Phoenix/refs/heads/main/Phoenix.lua"))()
 
 local Window = Phoenix:CreateWindow({
-	Name = "FTAP Reborn",
-	BootTitle = "FTAP Reborn",
-	MainTitle = "FTAP Reborn",
-	Theme = "Default",
+    Name = "Example Window",
+    LoadingText = "Phoenix Script"
+    BootTitle = "Boot Window",
+    MainTitle = "Main Window",
+    Theme = "Default"
+    ToggleUiKey = K
 })
-
--- UI Toggle Keybind
-UserInputService.InputBegan:Connect(function(input, gp)
-	if gp or Window._isBindingKey then
-		return
-	end
-	if input.KeyCode == Enum.KeyCode.K then
-		Window:ToggleUI()
-	end
-end)
 
 ----------------------------------------------------------------
 -- TABS
@@ -66,6 +58,7 @@ mainSection:CreateButton({
 local autoPrint = false
 mainSection:CreateToggle({
 	Name = "Auto Print",
+	ConfigKey = "auto_print_state",
 	Default = false,
 	Callback = function(state)
 		autoPrint = state
@@ -93,6 +86,7 @@ local walkSection = MovementTab:CreateSection({ Name = "Walk Settings" })
 -- WalkSpeed
 walkSection:CreateSlider({
 	Name = "WalkSpeed",
+	ConfigKey = "walkspeed_value",
 	Min = 16,
 	Max = 100,
 	Default = 16,
@@ -112,6 +106,7 @@ local tpwalkSpeed = 1.5
 
 walkSection:CreateToggle({
 	Name = "TP Walk",
+	ConfigKey = "tpwalk_state",
 	Default = false,
 	Callback = function(state)
 		tpwalkEnabled = state
@@ -120,6 +115,7 @@ walkSection:CreateToggle({
 
 walkSection:CreateSlider({
 	Name = "TPWalk Speed",
+	ConfigKey = "tpwalk_value",
 	Min = 0.5,
 	Max = 5,
 	Default = 1.5,
@@ -133,6 +129,7 @@ walkSection:CreateSlider({
 local noclipEnabled = false
 walkSection:CreateToggle({
 	Name = "Noclip",
+	ConfigKey = "noclip_state",
 	Default = false,
 	Callback = function(state)
 		noclipEnabled = state
@@ -232,6 +229,7 @@ local jumpSection = MovementTab:CreateSection({ Name = "Jump Settings" })
 
 jumpSection:CreateSlider({
 	Name = "JumpPower",
+	ConfigKey = "jp_value",
 	Min = 0,
 	Max = 200,
 	Default = 25,
@@ -250,6 +248,7 @@ jumpSection:CreateSlider({
 local infiniteJumpEnabled = false
 jumpSection:CreateToggle({
 	Name = "Infinite Jump",
+	ConfigKey = "infjump_state",
 	Default = false,
 	Callback = function(state)
 		infiniteJumpEnabled = state
@@ -271,6 +270,7 @@ end)
 -- Gravity
 local gravitySlider = jumpSection:CreateSlider({
 	Name = "Gravity",
+	ConfigKey = "grav_value",
 	Min = 0,
 	Max = 1000,
 	Default = 100,
@@ -306,6 +306,7 @@ combatSection:CreateButton({
 local autoDie = false
 combatSection:CreateToggle({
 	Name = "Auto Die",
+	ConfigKey = "autodie_state",
 	Default = false,
 	Callback = function(state)
 		autoDie = state
@@ -326,6 +327,7 @@ end)
 
 combatSection:CreatePlayerDropdown({
 	Name = "Players",
+	ConfigKey = "selected_plr",
 	Default = "Select...",
 	Callback = function(playerObj, playerName)
 		print("Selected:", playerName, playerObj)
@@ -417,6 +419,7 @@ end
 combatSection:CreateToggle({
 	Name = "Massless Grab",
 	Default = false,
+	ConfigKey = "massless_state",
 	Callback = function(state)
 		grabEnabled = state
 		if state then
@@ -431,6 +434,7 @@ combatSection:CreateToggle({
 
 combatSection:CreateInput({
 	Name = "Scroll Increment",
+	ConfigKey = "massless_value",
 	Placeholder = "10",
 	Default = "10",
 	Callback = function(text)
@@ -506,6 +510,7 @@ end
 
 combatSection:CreateToggle({
 	Name = "Kill Grab",
+	ConfigKey = "killgrab_state",
 	Default = false,
 	Callback = function(state)
 		grabKillEnabled = state
@@ -584,6 +589,7 @@ end
 
 combatSection:CreateToggle({
 	Name = "OP Kill Grab",
+	ConfigKey = "opkg_state",
 	Default = false,
 	Callback = function(state)
 		OPKillGrabEnabled = state
@@ -605,6 +611,7 @@ combatSection:CreateNote({
 
 combatSection:CreateInput({
 	Name = "OP Kill grab X",
+	ConfigKey = "opkg_x_value",
 	Placeholder = tostring(toX),
 	Default = tostring(toX),
 	Callback = function(text)
@@ -617,6 +624,7 @@ combatSection:CreateInput({
 
 combatSection:CreateInput({
 	Name = "OP Kill grab Y",
+	ConfigKey = "opkg_y_val",
 	Placeholder = tostring(toY),
 	Default = tostring(toY),
 	Callback = function(text)
@@ -629,6 +637,7 @@ combatSection:CreateInput({
 
 combatSection:CreateInput({
 	Name = "OP Kill grab Z",
+	ConfigKey = "opkg_x_val",
 	Placeholder = tostring(toZ),
 	Default = tostring(toZ),
 	Callback = function(text)
@@ -732,6 +741,7 @@ end
 
 combatSection:CreateToggle({
 	Name = "Anti Grab",
+	ConfigKey = "ag_state",
 	Default = false,
 	Callback = function(state)
 		antiGrabEnabled = state
@@ -768,6 +778,7 @@ end
 
 combatSection:CreateToggle({
 	Name = "Anti Explode",
+	ConfigKey = "antiexp_state",
 	Default = false,
 	Callback = function(state)
 		antiExplodeEnabled = state
@@ -817,6 +828,7 @@ end
 
 combatSection:AddToggle({
 	Name = "Anti Blobman",
+	ConfigKey = "antiblob_state",
 	Default = false,
 	Callback = function(state)
 		antiBlobmanEnabled = state
@@ -871,6 +883,7 @@ local originalTime = Lighting.ClockTime
 
 shaderSection:CreateToggle({
 	Name = "Shaders",
+	ConfigKey = "shader_state",
 	Default = false,
 	Callback = function(state)
 		bloom.Enabled = state
@@ -906,6 +919,7 @@ local coreGuiTypes = {
 
 shaderSection:CreateToggle({
 	Name = "Cinematic Mode",
+	ConfigKey = "cinematic_state",
 	Default = false,
 	Callback = function(state)
 		if state then
@@ -950,6 +964,7 @@ local cameraSection = VisualTab:CreateSection({ Name = "Camera Settings" })
 
 cameraSection:CreateSlider({
 	Name = "FOV",
+	ConfigKey = "fov_value",
 	Default = 70,
 	Step = 1,
 	Min = 1,
@@ -961,6 +976,7 @@ cameraSection:CreateSlider({
 
 cameraSection:CreateToggle({
 	Name = "Third Person",
+	ConfigKey = "thirdp_state",
 	Default = false,
 	Callback = function(state)
 		if state then
@@ -1020,6 +1036,7 @@ testingSection1:CreateButton({
 
 testingSection1:CreateToggle({
 	Name = "Test Toggle",
+	ConfigKey = "1_toggle_ex",
 	Default = false,
 	Callback = function(value)
 		print("Toggle state changed to:", value)
@@ -1028,6 +1045,7 @@ testingSection1:CreateToggle({
 
 testingSection1:CreateSlider({
 	Name = "Test Slider",
+	ConfigKey = "1_slider_ex",
 	Default = 50,
 	Step = 1,
 	Min = 0,
@@ -1039,6 +1057,7 @@ testingSection1:CreateSlider({
 
 testingSection1:CreateInput({
 	Name = "Test Input",
+	ConfigKey = "1_input_ex",
 	Placeholder = "Input...",
 	Default = "",
 	Callback = function(text)
@@ -1052,6 +1071,7 @@ testingSection1:CreateNote({
 
 testingSection1:CreateDropdown({
 	Name = "Dropdown Test",
+	ConfigKey = "1_dropdown_ex",
 	Options = {
 		"TwentyOneCharactersss",
 		"Button2",
