@@ -777,6 +777,61 @@ combatSection:CreateToggle({
 	end,
 })
 
+-- Anti Blobman
+local antiBlobmanEnabled = false
+local function antiBlob()
+	local char = player.Character
+	if char then
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			for _, desc in pairs(workspace:GetDescendants()) do
+				if
+					desc:IsA("BasePart")
+					and (desc.Name == "LeftDetector" or desc.Name == "RightDetector")
+					and (hrp.Position - desc.Position).Magnitude > 10
+				then
+					desc:Destroy()
+				end
+			end
+			return
+		else
+			return
+		end
+	else
+		return
+	end
+end
+
+local function removeMassless()
+	while antiBlobmanEnabled do
+		if player.Character then
+			for _, desc in ipairs(player.Character:GetDescendants()) do
+				if desc:IsA("BasePart") and desc.Massless then
+					desc.Massless = false
+				end
+			end
+		end
+		task.wait(1)
+	end
+end
+
+combatSection:AddToggle({
+	Name = "Anti Blobman",
+	Default = false,
+	Callback = function(state)
+		antiBlobmanEnabled = state
+		if antiBlobmanEnabled then
+			task.spawn(function()
+				while antiBlobmanEnabled do
+					antiBlob()
+					task.wait(1)
+				end
+			end)
+			task.spawn(removeMassless)
+		end
+	end,
+})
+
 ----------------------------------------------------------------
 -- VISUAL TAB
 ----------------------------------------------------------------
