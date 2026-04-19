@@ -826,7 +826,7 @@ local function removeMassless()
 	end
 end
 
-combatSection:AddToggle({
+combatSection:CreateToggle({
 	Name = "Anti Blobman",
 	ConfigKey = "antiblob_state",
 	Default = false,
