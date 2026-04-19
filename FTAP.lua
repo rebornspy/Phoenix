@@ -24,7 +24,7 @@ local Phoenix =
 
 local Window = Phoenix:CreateWindow({
     Name = "Example Window",
-    LoadingText = "Phoenix Script"
+    LoadingText = "Phoenix Script",
     BootTitle = "Boot Window",
     MainTitle = "Main Window",
     Theme = "Default"
