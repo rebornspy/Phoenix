@@ -342,6 +342,7 @@ function Phoenix:CreateWindow(config)
 	local loadingFrame = Instance.new("Frame")
 	loadingFrame.Name = "LoadingScreen"
 	loadingFrame.Size = UDim2.new(0, 380, 0, 260)
+	loadingFrame.Position = UDim2.new(0.5, -190, 0.5, -130)
 	loadingFrame.BorderSizePixel = 0
 	loadingFrame.ZIndex = 50
 	loadingFrame.Parent = getSafeParent()
