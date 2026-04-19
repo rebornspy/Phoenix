@@ -8,6 +8,9 @@ local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
 local StarterGui = game:GetService("StarterGui")
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
+local repStorage = game:GetService("ReplicatedStorage")
+local charEvents = repStorage:WaitForChild("CharacterEvents")
+local struggle = charEvents:FindFirstChild("Struggle")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -650,93 +653,25 @@ combatSection:CreateInput({
 
 -- Antigrab
 local antiGrabEnabled = false
-local antiGrabConnection
-local antiGrabThread
 
-local function delayedReturn(originalPos, delay)
-	local char = player.Character
-	if not char then
-		return
-	end
-
-	local root = char:FindFirstChild("HumanoidRootPart")
-	if not root then
-		return
-	end
-
-	task.wait(delay)
-	root.AssemblyLinearVelocity = Vector3.zero
-	task.wait()
-	char:MoveTo(originalPos)
-	root.AssemblyLinearVelocity = Vector3.zero
-end
-
-local function startAntiGrab()
-	-- Listener for GrabParts appearing
-	antiGrabConnection = workspace.DescendantAdded:Connect(function(desc)
-		if not antiGrabEnabled then
-			return
-		end
-		if desc.Name ~= "GrabParts" then
-			return
-		end
-
-		local char = player.Character
-		if not char then
-			return
-		end
-
-		for _, v in ipairs(char:GetChildren()) do
-			local grabPart = desc:FindFirstChild("GrabPart")
-			if not grabPart then
-				return
-			end
-
-			local weld = grabPart:FindFirstChild("WeldConstraint")
-			if not weld or not weld.Part1 then
-				return
-			end
-
-			if v == weld.Part1 then
-				print("You've been grabbed")
-
-				desc:Destroy()
-
-				local events = game:GetService("ReplicatedStorage"):FindFirstChild("CharacterEvents")
-				if events and events:FindFirstChild("Struggle") then
-					events.Struggle:FireServer()
-				end
-
-				local root = char:FindFirstChild("HumanoidRootPart")
-				if root then
-					task.spawn(delayedReturn, root.Position, 1.5)
+local antiGrabEnabled = false
+local function antiGrabLoop()
+	while antiGrabEnabled and task.wait() do
+		if player:FindFirstChild("IsHeld") and player.IsHeld.Value == true then
+			local char = player.Character
+			if char then
+				local hrp = char:FindFirstChild("HumanoidRootPart")
+				if hrp then
+					hrp.Anchored = true
+					while player.IsHeld.Value == true and antiGrabEnabled do
+						struggle:FireServer(player)
+						task.wait(0.001)
+					end
+					hrp.Anchored = false
 				end
 			end
 		end
-	end)
-
-	-- Thread that constantly resets IsHeld + HeldTimer
-	antiGrabThread = task.spawn(function()
-		while antiGrabEnabled do
-			local plr = player
-			if plr and plr:FindFirstChild("IsHeld") then
-				plr.IsHeld.Value = false
-			end
-			if plr and plr:FindFirstChild("HeldTimer") then
-				plr.HeldTimer.Value = 0
-			end
-			task.wait()
-		end
-	end)
-end
-
-local function stopAntiGrab()
-	if antiGrabConnection then
-		antiGrabConnection:Disconnect()
-		antiGrabConnection = nil
 	end
-
-	antiGrabEnabled = false
 end
 
 combatSection:CreateToggle({
@@ -745,13 +680,10 @@ combatSection:CreateToggle({
 	Default = false,
 	Callback = function(state)
 		antiGrabEnabled = state
-
-		if state then
-			startAntiGrab()
-		else
-			stopAntiGrab()
-		end
-	end,
+        if antiGrabEnabled then
+            task.spawn(antiGrabLoop)
+        end
+    end,
 })
 
 -- Anti Explode
@@ -784,62 +716,6 @@ combatSection:CreateToggle({
 		antiExplodeEnabled = state
 		if antiExplodeEnabled then
 			task.spawn(antiExplodeLoop)
-		end
-	end,
-})
-
--- Anti Blobman
-local antiBlobmanEnabled = false
-local function antiBlob()
-	local char = player.Character
-	if char then
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if hrp then
-			for _, desc in pairs(workspace:GetDescendants()) do
-				if
-					desc:IsA("BasePart")
-					and (desc.Name == "LeftDetector" or desc.Name == "RightDetector")
-					and (hrp.Position - desc.Position).Magnitude > 10
-				then
-					desc:Destroy()
-				end
-			end
-			return
-		else
-			return
-		end
-	else
-		return
-	end
-end
-
-local function removeMassless()
-	while antiBlobmanEnabled do
-		if player.Character then
-			for _, desc in ipairs(player.Character:GetDescendants()) do
-				if desc:IsA("BasePart") and desc.Massless then
-					desc.Massless = false
-				end
-			end
-		end
-		task.wait(1)
-	end
-end
-
-combatSection:CreateToggle({
-	Name = "Anti Blobman",
-	ConfigKey = "antiblob_state",
-	Default = false,
-	Callback = function(state)
-		antiBlobmanEnabled = state
-		if antiBlobmanEnabled then
-			task.spawn(function()
-				while antiBlobmanEnabled do
-					antiBlob()
-					task.wait(1)
-				end
-			end)
-			task.spawn(removeMassless)
 		end
 	end,
 })
