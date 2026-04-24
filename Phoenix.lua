@@ -1720,6 +1720,10 @@ function Section:CreateInput(config)
 	box.Parent = frame
 	addCorner(box, 6)
 
+	local function setText(v)
+		box.Text = v
+	end
+	
 	-- Hover
 	box.MouseEnter:Connect(function()
 		local Theme = window.Theme
@@ -1761,7 +1765,12 @@ function Section:CreateInput(config)
 	window:_registerThemeObject(box, "Font", "Font")
 	window:_registerThemeObject(box, "PlaceholderColor3", "SubtitleText")
 
-	return box
+	return {
+		Set = setText,
+		Get = function()
+			return box.Text
+		end,
+	}
 end
 
 -- NOTE
