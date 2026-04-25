@@ -2033,6 +2033,8 @@ function Section:CreatePlayerDropdown(config)
 		end,
 	})
 
+	dropdown.Refresh(getPlayerNames())
+	
 	Players.PlayerAdded:Connect(function()
 		dropdown.Refresh(getPlayerNames())
 	end)
