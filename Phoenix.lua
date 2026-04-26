@@ -2027,7 +2027,7 @@ function Section:CreatePlayerDropdown(config)
 	end
 
     local function getPlayerNames()
-	    local list = { "Select" }
+	    local list = {}
 	    for _, plr in pairs(Players:GetPlayers()) do
         	table.insert(list, toDisplay(plr))
 	    end
