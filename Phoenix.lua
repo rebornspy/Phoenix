@@ -1933,6 +1933,14 @@ function Section:CreateDropdown(config)
 			optBtn.Parent = listFrame
 			addCorner(optBtn, 4)
 
+			optBtn.MouseEnter:Connect(function()
+				tween(optBtn, 0.1, { BackgroundColor3 = Theme.AccentGlow })
+			end)
+		
+			optBtn.MouseLeave:Connect(function()
+				tween(optBtn, 0.1, { BackgroundColor3 = Theme.Accent })
+			end)
+
 			window:_registerThemeObject(optBtn, "BackgroundColor3", "Accent")
 			window:_registerThemeObject(optBtn, "TextColor3", "Text")
 			window:_registerThemeObject(optBtn, "Font", "Font")
@@ -1947,14 +1955,6 @@ function Section:CreateDropdown(config)
 	end
 
 	buildOptions()
-
-	optBtn.MouseEnter:Connect(function()
-		tween(optBtn, 0.1, { BackgroundColor3 = Theme.AccentGlow })
-	end)
-
-	optBtn.MouseLeave:Connect(function()
-		tween(optBtn, 0.1, { BackgroundColor3 = Theme.Accent })
-	end)
 	
 	-- Toggle dropdown
 	button.MouseButton1Click:Connect(function()
