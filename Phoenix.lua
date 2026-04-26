@@ -1940,11 +1940,11 @@ function Section:CreateDropdown(config)
 			optBtn.MouseEnter:Connect(function()
 				tween(optBtn, 0.1, { BackgroundColor3 = Theme.AccentGlow })
 			end)
-		
+
 			optBtn.MouseLeave:Connect(function()
 				tween(optBtn, 0.1, { BackgroundColor3 = Theme.Accent })
 			end)
-			
+
 			optBtn.MouseButton1Click:Connect(function()
 				setValue(opt)
 				open = false
@@ -1955,7 +1955,7 @@ function Section:CreateDropdown(config)
 	end
 
 	buildOptions()
-	
+
 	-- Toggle dropdown
 	button.MouseButton1Click:Connect(function()
 		open = not open
