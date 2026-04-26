@@ -719,13 +719,18 @@ function Phoenix:CreateWindow(config)
 	mainBody.ZIndex = 21
 	mainBody.Parent = mainFrame
 
-	local sidebar = Instance.new("Frame")
+	local sidebar = Instance.new("ScrollingFrame")
 	sidebar.Name = "Sidebar"
 	sidebar.Size = UDim2.new(0, 140, 1, 0)
 	sidebar.BackgroundColor3 = Theme.Panel
 	sidebar.BorderSizePixel = 0
 	sidebar.ZIndex = 21
 	sidebar.Parent = mainBody
+	sidebar.ScrollBarThickness = 0
+	-- sidebar.ScrollBarImageColor3 = Theme.Accent
+	sidebar.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	sidebar.ScrollingDirection = Enum.ScrollingDirection.Y
+	sidebar.CanvasSize = UDim2.fromScale(0, 1)
 	addCorner(sidebar, Theme.CornerRadius)
 
 	local sidebarList = Instance.new("UIListLayout")
