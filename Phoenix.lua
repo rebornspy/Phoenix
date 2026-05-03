@@ -1809,7 +1809,7 @@ function Section:CreateDropdown(config)
 	config = config or {}
 	local name = config.Name or "Dropdown"
 	local keyReq = config.keyReq or true
-	if keyReq then
+	if keyReq == true then
 		local key = config.ConfigKey
 	end
 	local options = config.Options or {}
@@ -1818,13 +1818,13 @@ function Section:CreateDropdown(config)
 
 	local window = self._window
 	local Theme = window.Theme
-	if keyReq then
+	if keyReq == true then
 		if not key then
 			warn("[Phoenix] Missing ConfigKey for Dropdown: " .. tostring(name))
 		end
 	end
 
-	if keyReq then
+	if keyReq == true then
 		local saved = key and window:GetConfigValue(key, default) or default
 	end
 	
@@ -1909,7 +1909,7 @@ function Section:CreateDropdown(config)
 	local function setValue(v)
 		button.Text = tostring(v)
 
-		if keyReq then
+		if keyReq == true then
 			if key then
 				window:SetConfigValue(key, v)
 			end
@@ -1993,7 +1993,7 @@ function Section:CreateDropdown(config)
 	window:_registerThemeObject(listFrame, "ScrollBarImageColor3", "AccentHover")
 	window:_registerThemeObject(listStroke, "Color", "AccentGlow")
 
-	if keyReq then
+	if keyReq == true then
 		if key then
 			table.insert(window._configCallbacks, function(cfg)
 				local v = cfg[key]
