@@ -1808,6 +1808,7 @@ end
 function Section:CreateDropdown(config)
 	config = config or {}
 	local name = config.Name or "Dropdown"
+	local keyReq = config.keyReq
 	local key = config.ConfigKey
 	local options = config.Options or {}
 	local default = config.Default or nil
@@ -1815,13 +1816,16 @@ function Section:CreateDropdown(config)
 
 	local window = self._window
 	local Theme = window.Theme
-
-	if not key then
-		warn("[Phoenix] Missing ConfigKey for Dropdown: " .. tostring(name))
+	if keyReq then
+		if not key then
+			warn("[Phoenix] Missing ConfigKey for Dropdown: " .. tostring(name))
+		end
 	end
 
-	local saved = key and window:GetConfigValue(key, default) or default
-
+	if keyReq then
+		local saved = key and window:GetConfigValue(key, default) or default
+	end
+	
 	-- Container
 	local frame = Instance.new("Frame")
 	frame.Name = "Dropdown"
@@ -1903,8 +1907,10 @@ function Section:CreateDropdown(config)
 	local function setValue(v)
 		button.Text = tostring(v)
 
-		if key then
-			window:SetConfigValue(key, v)
+		if keyReq then
+			if key then
+				window:SetConfigValue(key, v)
+			end
 		end
 
 		callback(v)
@@ -1985,13 +1991,15 @@ function Section:CreateDropdown(config)
 	window:_registerThemeObject(listFrame, "ScrollBarImageColor3", "AccentHover")
 	window:_registerThemeObject(listStroke, "Color", "AccentGlow")
 
-	if key then
-		table.insert(window._configCallbacks, function(cfg)
-			local v = cfg[key]
-			if v ~= nil then
-				setValue(v)
-			end
-		end)
+	if keyReq then
+		if key then
+			table.insert(window._configCallbacks, function(cfg)
+				local v = cfg[key]
+				if v ~= nil then
+					setValue(v)
+				end
+			end)
+		end
 	end
 
 	return {
@@ -2011,12 +2019,7 @@ end
 
 -- PLAYER DROPDOWN
 function Section:CreatePlayerDropdown(config)
-    local key = config.ConfigKey
     local name = config.Name or "Players"
-
-    if not key then
-        warn("[Phoenix] Missing ConfigKey for PlayerDropdown: " .. tostring(name))
-    end
 
     local function toDisplay(plr)
         return plr.DisplayName .. " (" .. plr.Name .. ")"
@@ -2039,7 +2042,7 @@ function Section:CreatePlayerDropdown(config)
         Name = name,
         Options = getPlayerNames(),
         Default = config.Default or "Select",
-        ConfigKey = key,
+		keyReq = false,
         Callback = function(selected)
             if config.Callback then
                 local username = toUsername(selected)
