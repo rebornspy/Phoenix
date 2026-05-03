@@ -1808,7 +1808,7 @@ end
 function Section:CreateDropdown(config)
 	config = config or {}
 	local name = config.Name or "Dropdown"
-	local keyReq = config.keyReq
+	local keyReq = config.keyReq or true
 	if keyReq then
 		local key = config.ConfigKey
 	end
