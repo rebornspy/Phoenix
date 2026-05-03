@@ -1809,24 +1809,19 @@ function Section:CreateDropdown(config)
 	config = config or {}
 	local name = config.Name or "Dropdown"
 	local keyReq = config.keyReq or true
-	if keyReq == true then
-		local key = config.ConfigKey
-	end
+	local key = config.ConfigKey
 	local options = config.Options or {}
 	local default = config.Default or nil
 	local callback = config.Callback or function() end
 
 	local window = self._window
 	local Theme = window.Theme
-	if keyReq == true then
-		if not key then
-			warn("[Phoenix] Missing ConfigKey for Dropdown: " .. tostring(name))
-		end
+	
+	if keyReq and not key then
+		warn("[Phoenix] Missing ConfigKey for Dropdown: " .. tostring(name))
 	end
-
-	if keyReq == true then
-		local saved = key and window:GetConfigValue(key, default) or default
-	end
+	
+	local saved = keyReq and key and window:GetConfigValue(key, default) or default
 	
 	-- Container
 	local frame = Instance.new("Frame")
@@ -1909,10 +1904,8 @@ function Section:CreateDropdown(config)
 	local function setValue(v)
 		button.Text = tostring(v)
 
-		if keyReq == true then
-			if key then
-				window:SetConfigValue(key, v)
-			end
+		if keyReq and key then
+			window:SetConfigValue(key, v)
 		end
 
 		callback(v)
@@ -1993,15 +1986,13 @@ function Section:CreateDropdown(config)
 	window:_registerThemeObject(listFrame, "ScrollBarImageColor3", "AccentHover")
 	window:_registerThemeObject(listStroke, "Color", "AccentGlow")
 
-	if keyReq == true then
-		if key then
-			table.insert(window._configCallbacks, function(cfg)
-				local v = cfg[key]
-				if v ~= nil then
-					setValue(v)
-				end
-			end)
-		end
+	if keyReq and key then
+		table.insert(window._configCallbacks, function(cfg)
+			local v = cfg[key]
+			if v ~= nil then
+				setValue(v)
+			end
+		end)
 	end
 
 	return {
