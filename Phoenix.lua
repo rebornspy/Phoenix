@@ -1809,7 +1809,9 @@ function Section:CreateDropdown(config)
 	config = config or {}
 	local name = config.Name or "Dropdown"
 	local keyReq = config.keyReq
-	local key = config.ConfigKey
+	if keyReq then
+		local key = config.ConfigKey
+	end
 	local options = config.Options or {}
 	local default = config.Default or nil
 	local callback = config.Callback or function() end
