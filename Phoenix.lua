@@ -1969,6 +1969,7 @@ function Section:CreateDropdown(config)
 		    listFrame.Visible = true
 		    listFrame.ScrollBarThickness = 4
 		    listFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+			listFrame.Size = UDim2.new(0, 400, 0, 0)
 		    tween(listFrame, 0.15, { Size = UDim2.new(0, 400, 0, 300) })
 		else
 		    tween(listFrame, 0.15, { Size = UDim2.new(0, 400, 0, 0) })
