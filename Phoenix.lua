@@ -1884,7 +1884,6 @@ function Section:CreateDropdown(config)
 	listStroke.Thickness = 0.5
 	listStroke.Transparency = 0.5
 	listStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	listStroke.Visible = false
 	listStroke.Parent = listFrame
 
 	local listLayout = Instance.new("UIListLayout")
