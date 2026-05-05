@@ -1963,6 +1963,8 @@ function Section:CreateDropdown(config)
 
 	-- Toggle dropdown
 	button.MouseButton1Click:Connect(function()
+		open = not open
+		
 		if open then
 		    listFrame.Visible = true
 		    listFrame.ScrollBarThickness = 4
