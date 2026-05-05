@@ -1,13 +1,7 @@
 --[[
     Phoenix Interface Suite
     by reborb (@rebornspy)
-    
-    Credits:
-        SCRIPTING       |   @rebornspy
-        DESIGN          |   @rebornspy
-        DOCUMENTATION   |   @rebornspy
-		EVERYTHING ELSE |   @rebornspy
-    (yes this is a solo dev project)
+    This is a solo developer project.
 ]]
 
 local Phoenix = {}
