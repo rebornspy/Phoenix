@@ -1884,6 +1884,7 @@ function Section:CreateDropdown(config)
 	listStroke.Thickness = 0.5
 	listStroke.Transparency = 0.5
 	listStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	listStroke.Visible = false
 	listStroke.Parent = listFrame
 
 	local listLayout = Instance.new("UIListLayout")
@@ -1952,11 +1953,13 @@ function Section:CreateDropdown(config)
 			optBtn.MouseButton1Click:Connect(function()
 	            setValue(opt)
 				open = false
-	            tween(listFrame, 0.15, { Size = UDim2.new(0, 400, 0, 0) })
-
-			    task.delay(0.15, function()
+				
+				task.delay(0.15, function()
 			        if not open then
 			            listFrame.Visible = false
+			            listFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+			            listFrame.AutomaticCanvasSize = Enum.AutomaticSize.None
+			            listFrame.ScrollBarThickness = 0
 			        end
 			    end)
 	        end)
@@ -1967,18 +1970,21 @@ function Section:CreateDropdown(config)
 
 	-- Toggle dropdown
 	button.MouseButton1Click:Connect(function()
-		open = not open
-
 		if open then
-			listFrame.Visible = true
-			tween(listFrame, 0.15, { Size = UDim2.new(0, 400, 0, 300) })
+		    listFrame.Visible = true
+		    listFrame.ScrollBarThickness = 4
+		    listFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		    tween(listFrame, 0.15, { Size = UDim2.new(0, 400, 0, 300) })
 		else
-			tween(listFrame, 0.15, { Size = UDim2.new(0, 400, 0, 0) })
-			task.delay(0.15, function()
-				if not open then
-					listFrame.Visible = false
-				end
-			end)
+		    tween(listFrame, 0.15, { Size = UDim2.new(0, 400, 0, 0) })
+		    task.delay(0.15, function()
+		        if not open then
+		            listFrame.Visible = false
+		            listFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+		            listFrame.AutomaticCanvasSize = Enum.AutomaticSize.None
+		            listFrame.ScrollBarThickness = 0
+		        end
+		    end)
 		end
 	end)
 
