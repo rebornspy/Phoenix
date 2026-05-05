@@ -1951,7 +1951,13 @@ function Section:CreateDropdown(config)
 
 			optBtn.MouseButton1Click:Connect(function()
 	            setValue(opt)
-	            open = false
+	            tween(listFrame, 0.15, { Size = UDim2.new(0, 400, 0, 0) })
+
+			    task.delay(0.15, function()
+			        if not open then
+			            listFrame.Visible = false
+			        end
+			    end)
 	        end)
 		end
 	end
