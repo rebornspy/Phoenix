@@ -2036,6 +2036,7 @@ function Section:CreatePlayerDropdown(config)
         Options = getPlayerNames(),
         Default = config.Default or "Select",
 		keyReq = false,
+		ConfigKey = name .. "_plr",
         Callback = function(selected)
             if config.Callback then
                 local username = toUsername(selected)
