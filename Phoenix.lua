@@ -1919,40 +1919,40 @@ function Section:CreateDropdown(config)
 			end
 		end
 
-		for _, opt in ipairs(options) do
-			local optBtn = Instance.new("TextButton")
-			optBtn.Name = "Option"
-			optBtn.AutomaticSize = Enum.AutomaticSize.X
-			optBtn.Size = UDim2.new(1, -8, 0, 20)
-			optBtn.BackgroundColor3 = Theme.Accent
-			optBtn.BorderSizePixel = 0
-			optBtn.Font = Theme.Font
-			optBtn.Text = tostring(opt)
-			optBtn.TextColor3 = Theme.Text
-			optBtn.TextSize = 14
-			optBtn.AutoButtonColor = false
-			optBtn.ZIndex = 25
-			optBtn.Parent = listFrame
-			addCorner(optBtn, 4)
-			
-			optBtn.MouseEnter:Connect(function()
-				tween(optBtn, 0.1, { BackgroundColor3 = Theme.AccentGlow })
-			end)
+		local Theme = window.Theme
 
-			optBtn.MouseLeave:Connect(function()
-				tween(optBtn, 0.1, { BackgroundColor3 = Theme.Accent })
-			end)
-			
+		for _, opt in ipairs(options) do
+	        local optBtn = Instance.new("TextButton")
+	        optBtn.Name = "Option"
+	        optBtn.AutomaticSize = Enum.AutomaticSize.X
+	        optBtn.Size = UDim2.new(1, -8, 0, 20)
+	        optBtn.BackgroundColor3 = Theme.Accent
+	        optBtn.BorderSizePixel = 0
+	        optBtn.Font = Theme.Font
+	        optBtn.Text = tostring(opt)
+	        optBtn.TextColor3 = Theme.Text
+	        optBtn.TextSize = 14
+	        optBtn.AutoButtonColor = false
+	        optBtn.ZIndex = 25
+	        optBtn.Parent = listFrame
+	        addCorner(optBtn, 4)
+
 			window:_registerThemeObject(optBtn, "BackgroundColor3", "Accent")
-			window:_registerThemeObject(optBtn, "TextColor3", "Text")
-			window:_registerThemeObject(optBtn, "Font", "Font")
+	        window:_registerThemeObject(optBtn, "TextColor3", "Text")
+	        window:_registerThemeObject(optBtn, "Font", "Font")
+
+			optBtn.MouseEnter:Connect(function()
+	            tween(optBtn, 0.1, { BackgroundColor3 = window.Theme.AccentGlow })
+	        end)
+	
+	        optBtn.MouseLeave:Connect(function()
+	            tween(optBtn, 0.1, { BackgroundColor3 = window.Theme.Accent })
+	        end)
 
 			optBtn.MouseButton1Click:Connect(function()
-				setValue(opt)
-				open = false
-				listFrame.Visible = false
-				listFrame.Size = UDim2.new(0, 400, 0, 0)
-			end)
+	            setValue(opt)
+	            open = false
+	        end)
 		end
 	end
 
